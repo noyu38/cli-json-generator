@@ -2,6 +2,7 @@
 
 import { input, confirm } from "@inquirer/prompts";
 import clipboard from "clipboardy";
+import { highlight } from "cli-highlight";
 
 async function main(): Promise<void> {
     const resultObj: Record<string, unknown> = {};
@@ -41,6 +42,13 @@ async function main(): Promise<void> {
 
     // JSON形式で出力
     const jsonOutput = JSON.stringify(resultObj, null, 2);
+
+    const colorJson = highlight(jsonOutput, {
+        language: "json",
+        ignoreIllegals: true
+    });
+
+    console.log(colorJson);
 
     // クリップボードにコピー
     try {
