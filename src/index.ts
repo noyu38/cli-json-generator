@@ -3,15 +3,15 @@
 import { input, confirm } from "@inquirer/prompts";
 import clipboard from "clipboardy";
 
-async function main() {
-    const resultObj = {};
+async function main(): Promise<void> {
+    const resultObj: Record<string, unknown> = {};
     console.log("Hello! This is an interactive JSON generator.");
 
     while (true) {
         // keyの値の入力を受け付ける
         const key = await input({
             message: "1. input key: ",
-            validate: (value) => value.trim().length > 0 || 'Key cannot be empty.'
+            validate: (value: string) => value.trim().length > 0 || 'Key cannot be empty.'
         });
 
         // valueの値の入力を受け付ける
@@ -19,7 +19,7 @@ async function main() {
             message: `2. input value of ${key}: `
         });
 
-        let parsedValue;
+        let parsedValue: unknown;
         try {
             parsedValue = JSON.parse(value);
         } catch (e) {

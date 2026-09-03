@@ -2,15 +2,25 @@
   "name": "cli-json-gen",
   "version": "1.0.0",
   "description": "A simple interactive JSON generator CLI",
-  "main": "index.js",
   "type": "module",
   "author": "noyu38",
+  "files": [
+    "dist"
+  ],
   "bin": {
-    "json-gen": "./index.js"
+    "json-gen": "./dist/index.js"
   },
-  "packageManager": "pnpm@10.18.3",
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch"
+  },
   "dependencies": {
     "@inquirer/prompts": "^8.6.0",
     "clipboardy": "^5.3.2"
+  },
+  "devDependencies": {
+    "@types/node": "^26.4.0",
+    "tsup": "^8.5.1",
+    "typescript": "^7.0.2"
   }
 }
