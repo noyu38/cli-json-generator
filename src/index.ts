@@ -1,23 +1,26 @@
 #!/usr/bin/env node
 
-import { input, confirm } from "@inquirer/prompts";
+// import { input, confirm } from "@inquirer/prompts";
+import { input, select } from "@inquirer/prompts";
 import clipboard from "clipboardy";
 import { highlight } from "cli-highlight";
 
 async function main(): Promise<void> {
     const resultObj: Record<string, unknown> = {};
+    // keyの順番を記憶させる
+    const keysHistory: string[] = [];
     console.log("Hello! This is an interactive JSON generator.");
 
     while (true) {
         // keyの値の入力を受け付ける
         const key = await input({
-            message: "1. input key: ",
+            message: "1. input key:",
             validate: (value: string) => value.trim().length > 0 || 'Key cannot be empty.'
         });
 
         // valueの値の入力を受け付ける
         const value = await input({
-            message: `2. input value of ${key}: `
+            message: `2. input value of ${key}:`
         });
 
         let parsedValue: unknown;
@@ -28,14 +31,50 @@ async function main(): Promise<void> {
         }
 
         resultObj[key] = parsedValue;
+        keysHistory.push(key);
 
-        // さらに追加するか聞く
-        const answer = await confirm({
-            message: "3. Add more?",
-            default: true
-        });
+        let isFinish = false;
 
-        if (!answer) {
+        // 追加後の行動を選択させる
+        while (true) {
+            const choices = [
+                { name: "Add more", value: "add"},
+                { name: "Finish", value: "finish"},
+            ];
+
+            // keyの履歴が１つ以上ある場合のみ、Undoの選択肢を表示する
+            if (keysHistory.length > 0) {
+                const lastKey = keysHistory[keysHistory.length - 1];
+                choices.push({
+                    name: "Delete last input (Undo)",
+                    value: "undo"
+                });
+            }
+
+            const action = await select({
+                message: "3. select next action:",
+                choices: choices
+            });
+
+            if (action === "add") {
+                break;
+            } else if (action === "finish") {
+                isFinish = true;
+                break;
+            } else if (action === "undo") {
+                const removeKey = keysHistory.pop();
+                if (removeKey) {
+                    delete resultObj[removeKey];
+                    console.log(`\nInput (${removeKey}) canceled.\n`);
+                }
+
+                if (keysHistory.length === 0) {
+                    console.log("Input data is empty. Please enter a new key.\n");
+                    break;
+                }
+            }
+        }
+        if (isFinish) {
             break;
         }
     }
