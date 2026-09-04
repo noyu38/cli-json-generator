@@ -38,15 +38,15 @@ async function main(): Promise<void> {
         // 追加後の行動を選択させる
         while (true) {
             const choices = [
-                { name: "Add more", value: "add"},
-                { name: "Finish", value: "finish"},
+                { name: "add more", value: "add"},
+                { name: "finish", value: "finish"},
             ];
 
             // keyの履歴が１つ以上ある場合のみ、Undoの選択肢を表示する
             if (keysHistory.length > 0) {
                 const lastKey = keysHistory[keysHistory.length - 1];
                 choices.push({
-                    name: "Delete last input (Undo)",
+                    name: `undo (delete last input of [${lastKey}])`,
                     value: "undo"
                 });
             }
