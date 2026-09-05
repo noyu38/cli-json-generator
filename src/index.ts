@@ -3,8 +3,6 @@
 import { input, select } from "@inquirer/prompts";
 import { highlight } from "cli-highlight";
 import { set, unset } from "lodash-es";
-
-// --- 分割したモジュールのインポート ---
 import { InputAction, OutputAction } from "./types.js";
 import { parseCliArgs } from "./args.js";
 import { parseValue } from "./parser.js";
