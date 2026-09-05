@@ -7,6 +7,8 @@ import { highlight } from "cli-highlight";
 import { set, unset, values } from "lodash-es";
 import fs from 'node:fs';
 import path from 'node:path';
+import { parseArgs } from 'node:util';
+import { array } from "node:stream/iter";
 
 enum InputAction {
     ADD = "add",
@@ -21,7 +23,31 @@ enum OutputAction {
 };
 
 async function main(): Promise<void> {
-    const resultObj: Record<string, unknown> = {};
+    // コマンドライン引数の解析
+    const { values } = parseArgs({
+        options: {
+            array: { type: "boolean", short: "a", default: false},
+            minify: { type: "boolean", short: "m", default: false},
+            help: { type: "boolean", short: "h", default: false},
+        },
+        strict: false, // 未知のフラグが使用されてもエラーで落ちないようにする
+    });
+
+    // ヘルプメッセージ
+    if (values.help) {
+        console.log(`
+usage:
+    json-gen [option]
+
+options:
+    -a, --array    Create the route as an array [] instead of an object {}
+    -m, --minify   Compress the output JSON into one line
+    -h, --help     show help message
+            `);
+        process.exit(0);
+    }
+
+    const resultObj: object = values.array ? [] : {};
     // keyの順番を記憶させる
     const keysHistory: string[] = [];
     console.log("Hello! This is an interactive JSON generator.");
@@ -107,8 +133,11 @@ async function main(): Promise<void> {
         }
     }
 
+    // minifyフラグの有無でインデントを制御する
+    const indent = values.minify ? undefined : 2;
+
     // JSON形式で出力
-    const jsonOutput = JSON.stringify(resultObj, null, 2);
+    const jsonOutput = JSON.stringify(resultObj, null, indent);
 
     const colorJson = highlight(jsonOutput, {
         language: "json",
