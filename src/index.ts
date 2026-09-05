@@ -4,6 +4,7 @@
 import { input, select } from "@inquirer/prompts";
 import clipboard from "clipboardy";
 import { highlight } from "cli-highlight";
+import { set, unset } from "lodash-es";
 
 async function main(): Promise<void> {
     const resultObj: Record<string, unknown> = {};
@@ -30,7 +31,8 @@ async function main(): Promise<void> {
             parsedValue = value;
         }
 
-        resultObj[key] = parsedValue;
+        // resultObj[key] = parsedValue;
+        set(resultObj, key, parsedValue);
         keysHistory.push(key);
 
         let isFinish = false;
@@ -64,7 +66,8 @@ async function main(): Promise<void> {
             } else if (action === "undo") {
                 const removeKey = keysHistory.pop();
                 if (removeKey) {
-                    delete resultObj[removeKey];
+                    // delete resultObj[removeKey];
+                    unset(resultObj, removeKey);
                     console.log(`\nInput (${removeKey}) canceled.\n`);
                 }
 
