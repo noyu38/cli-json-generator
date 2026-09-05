@@ -4,7 +4,21 @@
 import { input, select } from "@inquirer/prompts";
 import clipboard from "clipboardy";
 import { highlight } from "cli-highlight";
-import { set, unset } from "lodash-es";
+import { set, unset, values } from "lodash-es";
+import fs from 'node:fs';
+import path from 'node:path';
+
+enum InputAction {
+    ADD = "add",
+    FINISH = "finish",
+    UNDO = "undo"
+};
+
+enum OutputAction {
+    FILE = "file",
+    COPY = "copy",
+    BOTH = "both"
+};
 
 async function main(): Promise<void> {
     const resultObj: Record<string, unknown> = {};
@@ -15,13 +29,13 @@ async function main(): Promise<void> {
     while (true) {
         // keyの値の入力を受け付ける
         const key = await input({
-            message: "1. input key:",
+            message: "1. Enter key:",
             validate: (value: string) => value.trim().length > 0 || 'Key cannot be empty.'
         });
 
         // valueの値の入力を受け付ける
         const value = await input({
-            message: `2. input value of ${key}:`
+            message: `2. Enter value of ${key}:`
         });
 
         // シングルクォーテーションやダブルクォーテーションで囲まれている場合、強制的に文字列としてパースする
@@ -51,8 +65,8 @@ async function main(): Promise<void> {
         // 追加後の行動を選択させる
         while (true) {
             const choices = [
-                { name: "add more", value: "add" },
-                { name: "finish", value: "finish" },
+                { name: "add more", value: InputAction.ADD },
+                { name: "finish", value: InputAction.FINISH },
             ];
 
             // keyの履歴が１つ以上ある場合のみ、Undoの選択肢を表示する
@@ -60,21 +74,21 @@ async function main(): Promise<void> {
                 const lastKey = keysHistory[keysHistory.length - 1];
                 choices.push({
                     name: `undo (delete last input of [${lastKey}])`,
-                    value: "undo"
+                    value: InputAction.UNDO
                 });
             }
 
-            const action = await select({
-                message: "3. select next action:",
+            const inputAction = await select({
+                message: "3. Select next inputAction:",
                 choices: choices
             });
 
-            if (action === "add") {
+            if (inputAction === InputAction.ADD) {
                 break;
-            } else if (action === "finish") {
+            } else if (inputAction === InputAction.FINISH) {
                 isFinish = true;
                 break;
-            } else if (action === "undo") {
+            } else if (inputAction === InputAction.UNDO) {
                 const removeKey = keysHistory.pop();
                 if (removeKey) {
                     // delete resultObj[removeKey];
@@ -103,12 +117,40 @@ async function main(): Promise<void> {
 
     console.log(colorJson);
 
+    const outputAction = await select({
+        message: "Select a storage method:",
+        choices: [
+            { name: "as a json file", value: OutputAction.FILE },
+            { name: "copy to clipboard", value: OutputAction.COPY },
+            { name: "both (copy and file)", value: OutputAction.BOTH}
+        ]
+    })
     // クリップボードにコピー
-    try {
-        clipboard.writeSync(jsonOutput);
-        console.log("\n[SUCCESS] Copied JSON to clipboard!")
-    } catch (e) {
-        console.log("\n[ERROR] Failed to Copy JSON to clipboard...");
+    if (outputAction === OutputAction.COPY || outputAction === OutputAction.BOTH) {
+        try {
+            clipboard.writeSync(jsonOutput);
+            console.log("\n[SUCCESS] Copied JSON to clipboard!")
+        } catch (e) {
+            console.log("\n[ERROR] Failed to Copy JSON to clipboard...");
+        }
+    }
+
+    if (outputAction === OutputAction.FILE || outputAction === OutputAction.BOTH) {
+        const fileName = await input({
+            message: "Enter the file name to save:",
+            default: "data.json",
+            validate: (value: string) => value.trim().length > 0 || "File name cannot be empty."
+        });
+
+        try {
+            const filePath = path.resolve(process.cwd(), fileName);
+
+            fs.writeFileSync(filePath, jsonOutput, "utf-8");
+
+            console.log(`\n [SUCCESS] Save the file: ${filePath}\n`);
+        } catch (e) {
+            console.error("\n [ERROR] Failed to save the file:", e);
+        }
     }
 }
 
