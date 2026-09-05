@@ -26,8 +26,8 @@ options:
     }
 
     return {
-        array: values.array ?? false,
-        minify: values.minify ?? false,
-        help: values.help ?? false,
+        array: Boolean(values.array),
+        minify: Boolean(values.minify),
+        help: Boolean(values.help),
     };
 }
