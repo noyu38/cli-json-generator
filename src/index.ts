@@ -24,11 +24,22 @@ async function main(): Promise<void> {
             message: `2. input value of ${key}:`
         });
 
+        // シングルクォーテーションやダブルクォーテーションで囲まれている場合、強制的に文字列としてパースする
+        let isQuoted = false;
+        if ((value.startsWith("'") && value.endsWith("'") && value.length >= 2) || (value.startsWith('"') && value.endsWith('"') && value.length >= 2)) {
+            isQuoted = true;
+        }
+
         let parsedValue: unknown;
-        try {
-            parsedValue = JSON.parse(value);
-        } catch (e) {
-            parsedValue = value;
+
+        if (isQuoted) {
+            parsedValue = value.slice(1, -1);
+        } else {
+            try {
+                parsedValue = JSON.parse(value);
+            } catch (e) {
+                parsedValue = value;
+            }
         }
 
         // resultObj[key] = parsedValue;
@@ -40,8 +51,8 @@ async function main(): Promise<void> {
         // 追加後の行動を選択させる
         while (true) {
             const choices = [
-                { name: "add more", value: "add"},
-                { name: "finish", value: "finish"},
+                { name: "add more", value: "add" },
+                { name: "finish", value: "finish" },
             ];
 
             // keyの履歴が１つ以上ある場合のみ、Undoの選択肢を表示する
