@@ -12,7 +12,9 @@
   },
   "scripts": {
     "build": "tsup",
-    "dev": "tsup --watch"
+    "dev": "tsup --watch",
+    "test": "vitest",
+    "test:run": "vitest run"
   },
   "dependencies": {
     "@inquirer/prompts": "^8.6.0",
@@ -24,6 +26,7 @@
     "@types/lodash-es": "^4.17.12",
     "@types/node": "^26.4.0",
     "tsup": "^8.5.1",
-    "typescript": "^7.0.2"
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
   }
 }
