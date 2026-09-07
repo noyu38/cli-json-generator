@@ -10,14 +10,14 @@ on:
 
 jobs:
   test:
-    runs_on: ubuntu-latest
+    runs-on: ubuntu-latest
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
       - name: Install pnpm
-        uses:: pnpm/action-setup@v3
+        uses: pnpm/action-setup@v3
         with:
           version: 9
       
